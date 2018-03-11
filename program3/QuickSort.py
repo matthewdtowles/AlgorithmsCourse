@@ -5,9 +5,13 @@ inFile = open(INPUT_FILE, 'r')
 with inFile as f:
     inputNums = [int(integers.strip()) for integers in f.readlines()]
 
+comparisons = 0
+
 def quicksort(arr, lo, hi):
     if hi > lo:
+        global comparisons
         pivotPosition = partition(arr, lo, hi)
+        comparisons += (hi - lo)
         quicksort(arr, lo, pivotPosition - 1)
         quicksort(arr, pivotPosition + 1, hi)
 
@@ -19,10 +23,8 @@ def partition(arr, lo, hi):
     # j is iterator for for loop
     i = j = lo + 1
     while j <= hi:
-        print(str(j)+': '+str(arr[j]))
         if arr[j] < pivotVal:
             arr[j], arr[i] = arr[i], arr[j]
-            print(arr)
             i += 1
         j += 1
 
@@ -35,6 +37,7 @@ def partition(arr, lo, hi):
 
 
 quicksort(inputNums, 0, len(inputNums) - 1)
-print(inputNums[0])
-print(inputNums[1])
-print(inputNums[2])
+print('Number of comparisons made: ' + str(comparisons))
+# 1. 162085
+# 2. (164123)
+# 3. (138382)
