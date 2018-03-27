@@ -1,0 +1,165 @@
+XII. HEAPS
+
+  A data structure just like: lists, stacks, queues, search trees, hash tables, bloom filters, union-finds, etc...
+  Choose the 'minimal' DS - the less it does, the faster it is
+
+  XII.i. OPERATIONS AND APPLICATIONS
+
+    Supported Operations:
+      - INSERT: add new objects to a heap
+      - EXTRACT-MIN: remove an object in heap with a minimum key value
+        - Or you can have a Heap that can do EXTACT-MAX, but can only do min or max
+      - HEAPIFY: initialize a heap in O(n) time
+      - DELETE: in O(log n) time. i.e.: Deleting a key from middle of heap.
+
+    Application: Sorting
+      - Heaps are fast way to do repeated minimum computations
+      - Example: selection sort but has has O(n^2) runtime
+      - Better: Heapsort:
+        1. Insert all n array elements into a heap
+        2. Extract-min to pluck out elements in sorted order
+        run time = 2n heap operations = O(n log n) = mergesort and quicksort runtime
+        * O(n log n) is best we can do with comparison sorting
+        * close but not as good as quicksort
+
+    Application: Median Maintenance
+      - Each time run, give median of input
+      - For example: you are given a sequence of X1,...,Xn numbers, one-by-one
+        You must provide the median of {X1,...,Xi} at each step i
+        * Do this with the constraint of O(log i) time at each step i
+        ** Solution would use TWO heaps, hlow and hhigh:
+        -- maintain Hlow: support extract-max
+        -- maintain Hhigh: supports extract-min
+        -- maintain invariant that =~ i/2 smallest (largest) elements in Hlow (Hhigh)
+        -- once we have an inbalance between Hlow and Hhigh, we rebalance:
+            i.e.: if len(Hlow) = 10, len(Hhigh) = 8, extract-max from Hlow and add to Hhigh
+        -- so median will be high of Hlow or low of Hhigh or both
+
+
+XIII. BALANCED BINARY SEARCH TREES
+
+  XIII.i OPERATIONS AND APPLICATIONS
+
+    Sorted Arrays: Supported Operations
+      Operations:
+        SEARCH                                                      - O(log n)
+        SELECT (given order statistic i)                            - O(1)
+        MIN/MAX                                                     - O(1)
+        PREDECESSOR/SUCCESSOR (given pointer to a key)              - O(1)
+        RANK (i.e.: # of keys less than or equal to a given value)  - O(log n)
+        OUTPUT IN SORTED ORDER                                      - O(n)
+        * insertions and deletions are too slow
+
+    Balanced Search Trees: Supported Operations
+      Like a sorted array but faster inserts and deletes!
+      SELECT, MIN/MAX, PRED/SUCC are all slower                     - O(log n)
+      Does all above operations, almost all                         - O(log n)
+
+  XIII.ii BINARY SEARCH TREE BASICS I
+
+    Exactly one node per key
+    Each node has a left child pointer, right child pointer, parent pointer
+    * root node has a null parent pointer
+    Search Tree Property: at every node, Xi, all keys on left are <Xi
+      On right, all keys >Xi
+      ** This is different than Heap property where parent is smaller/larger than all child nodes
+    The Height of a BST
+      - Many possible trees for a set of keys
+      - log2n (perfect balance) <= height <= n (worst case)
+    Searching and Inserting
+      - To SEARCH for key k in tree T:
+        1. start at the root
+        2. traverse left/right child pointers as needed
+          * if k < key go left, else if k > key go right
+        3. return node with key k or NULL if no node with key k
+      - To INSERT a new key k into a tree T:
+        1. search for k (unsuccessfully)
+        2. rewire final NULL pointer to point to new node with key k
+
+  XIII.iii BINARY SEARCH TREE BASICS II
+
+    Min, Max, Pred, and Succ
+      To compute min key of a tree:
+        1. start at root
+        2. follow left child pointers until you can anymore
+        3. return last key found
+      To compute max key of a tree:
+        do opposite of above
+      To compute the pred of key k:
+        * easy case: if k's left subtree is nonempty, return max key in left subtree
+        ** noneasy case: follow parent pointers until you get to a key less than k
+      To compute succ of key k:
+        flip everything for pred
+
+    In-Order Traversal
+      To print out keys in increasing order
+        1. let r = root of search tree, with subtrees tL and tR
+        2. recurse on tL // prints out tL in increasing order
+        3. print out r's key
+        4. recurse on tR // prints out tR in increasing order
+        * run time O(n)
+
+    Deletion
+      To delete a key k from a search tree
+        1. search for k
+        // easy case: k has no children:
+        2e. delete k's node from tree - done.
+        // med case: k's node has one child
+        2m. just splice out k's node - done.
+        // unique child assumes position previously held by k's node
+        //---
+        // hard case: k's node has 2 children
+        // deleting much easier in a heap
+        2. compute k's pred l
+        // i.e.: traverse k's (non-null) left child pointer
+        // then right child pointers until no longer possible
+        3. swap k and l
+        // now we have an easy or med case and just delete
+        4. step 2e or 2m
+
+    Select and Rank
+      Idea: store a little bit of extra info at each tree node about the tree itself
+      ** not about the data though
+      Example augmentation: size(x) = # of treenodes in subtree route at x
+        * if x has children, y and z then:
+          * size(y) + size(z) + 1 = size(x) // + 1 for x node itself
+      Easy to keep sizes up to date during an insert or delete
+      How to select ith order statistic from augmented search tree:
+        1. start at root x, with children y and z
+        // when looking for ith largest/smallest node key need to know size of x's tree
+        // remember smaller keys on left and larger on right
+        2. let a = size(y) // a=0 if x has no left child
+        3. if a=i-1 return x's key
+        4. if a>=i recursively compute ith order stat of search tree rooted at y
+        5. if a<i-1 recursively computer (i-a-1)th order stat of search tree rooted at z
+        * runtime = O(height)
+
+
+  XIII.iv RED-BLACK TREES
+
+    Balanced Search Trees
+      Ensure height is always O(log n) // best possible
+      => search/insert/delete/min/max/pred/succ will then run in O(log n) time
+      // n = number of keys in tree
+      Example: Red-black trees, also AVL trees, splay trees, b+ trees
+
+    Red-Black Invariants
+      - each node red or black (1 bit of info stored)
+      - root is black
+      - no 2 red in a row // if red node => children are black
+      - every path you take from root to a null pointer passes same number of black nodes
+        // like in an unsuccessful search
+      Example #1:
+        a chain of length 3 cannot be a red black tree.
+
+    Height Guarantee
+      Every red-black tree with n nodes has height <= 2*log2(n+1)
+      Proof: if every root-null path has >= k nodes:
+        then tree inclues (at the top) a perfectly balanced tree of depth k -1
+        => size nn of tree must be >= (2^k) - 1
+          i.e.: if k=3 then n must be 7, 2 cubed is 8, -1 = 7
+        size n>=2^k -1, where k = min # of nodes on root-null path
+        => k<=log2(n+1)
+        Thus: in a red black tree with n nodes, there is a root-null path with at most log2(n+1) black nodes
+        By 4th Invariant: every root-null path has <=log2(n+1) black nodes.
+        By 3rd Invariant: Every root-null path has <= 2*log2(n+1) total nodes
